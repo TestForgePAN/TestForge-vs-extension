@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { vscode } from "./vscode";
 import SearchBar from "./components/searchBar";
+import CustomParams from './components/CustomParams';
 
 function App() {
     const [pushedTestCaseText, setPushedTestCaseText] = useState("");
@@ -21,7 +22,8 @@ function App() {
     }, [])
     return (
         <div className="bg-gradient-to-r from-blue-600 to-purple-500 p-10">
-            <h1>Welcome to Test Forge</h1>
+            <h1>TestForge</h1>
+            <CustomParams />
             <SearchBar />
             <button
                 onClick={() => {
@@ -31,7 +33,7 @@ function App() {
                     });
                 }}
             >
-                Generate test cases!!
+                Generate tests
             </button>
             <pre>{pushedTestCaseText}</pre>
         </div>

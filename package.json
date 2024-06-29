@@ -1,7 +1,7 @@
 {
-	"name": "myextension",
-	"displayName": "MyExtension",
-	"description": "My VS Code extension",
+	"name": "TestForge",
+	"displayName": "TestForge",
+	"description": "TestForge: For all your testing needs",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.60.0"

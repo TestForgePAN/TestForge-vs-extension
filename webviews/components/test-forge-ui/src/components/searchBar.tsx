@@ -34,6 +34,10 @@ function SearchBar() {
 
     return (
         <>
+        <h3>
+            Search and input files for context
+        </h3>
+        <hr />
         <Select
             options={files}
             onChange={(values) => {console.log(values);
@@ -58,6 +62,7 @@ function SearchBar() {
         >
             Send files for context
         </button>
+        <hr />
         </>
     );
 }
