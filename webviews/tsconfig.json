@@ -1,0 +1,12 @@
+{
+    "extends": "@tsconfig/svelte/tsconfig.json",
+    "include": [
+        "./**/*", "../frontend", "../tsconfig.json",
+    ],
+    "exclude": [
+        "../node_modules/*"
+    ],
+    "compilerOptions": {
+        "strict": true,
+    }
+}
