@@ -62,7 +62,7 @@ function SearchBar() {
                 margin: "1rem auto",
             }}
         />
-        <button
+        {/* <button
             id='sendFilesForContext'
             onClick={() => {
                 vscode.postMessage({
@@ -72,7 +72,7 @@ function SearchBar() {
             }}
         >
             Send files for context
-        </button>
+        </button> */}
         <hr />
         </>
     );

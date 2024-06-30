@@ -6,3 +6,4 @@ node_modules
 .deta
 secret.js
 /package-lock.json
+.parcel-cache/

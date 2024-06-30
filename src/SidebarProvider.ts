@@ -210,7 +210,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         files.push({
                             fileName: fileName,
                             content: fileContent,
-                            contextFile: "true",
+                            contextFile: true,
                         });
                     }
                     let editor = vscode.window.activeTextEditor;
@@ -225,7 +225,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     files.push({
                         fileName: fileName,
                         content: fileContent,
-                        contextFile: "false",
+                        contextFile: false,
                     });
                     try {
                         const response = await axios({
@@ -240,6 +240,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                                 files,
                                 customParams: data.value.customPropsRequest,
                             },
+                        });
+                        this._view?.webview.postMessage({
+                            type: "pushedTestCaseText",
+                            value: response.data,
                         });
                         console.log("Axios Generate response: ", response);
                     } catch (error) {
