@@ -13,9 +13,8 @@ function SearchBar() {
 
     useEffect(() => {
         window.addEventListener("message", (event) => {
-            // console.log("Recieved files");
-            // console.log(event);
             const message = event.data;
+            console.log("Recived message in search bar: " + message.type);
             switch (message.type) {
                 case "FilesInFolders": {
                     console.log("Recieved files");
@@ -23,14 +22,21 @@ function SearchBar() {
                     setFiles([]);
                     console.log(files);
                     message.value.forEach((file: string, idx: number) => {
-                        setFiles(prevState => [...prevState, {value: idx, label: file}]);
+                        setFiles((prevState) => [
+                            ...prevState,
+                            { value: idx, label: file },
+                        ]);
                     });
                     console.log("Files: ", files);
                     break;
                 }
                 case "sendContextFileData": {
                     // select the button with id sendFilesForContext and click it
-                    document.getElementById('sendFilesForContext').click();
+                    document.getElementById("sendFilesForContext")?.click();
+                    // vscode.postMessage({
+                    //     type: "gotContextFileData",
+                    //     value: values,
+                    // });
                     break;
                 }
             }

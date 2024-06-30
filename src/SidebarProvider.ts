@@ -8,13 +8,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     _doc?: vscode.TextDocument;
     fileList: string[] = [];
 
-    constructor(private readonly _extensionUri: vscode.Uri) { }
+    constructor(private readonly _extensionUri: vscode.Uri) {}
     public getFilesInDirectory(dir: string) {
         const files = fs.readdirSync(dir);
         files.forEach((file) => {
             const filePath = path.join(dir, file);
             if (fs.statSync(filePath).isDirectory()) {
-                if(file === ".git") { return; }
+                if (file === ".git") {
+                    return;
+                }
                 this.getFilesInDirectory(filePath);
             } else {
                 this.fileList.push(filePath);
@@ -44,7 +46,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
         let allFiles: string[] = [];
 
-        const generateTestReq = {
+        let generateTestReq = {
             customParams: [],
             files: [],
         };
@@ -77,7 +79,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         // Listen for messages from the Sidebar component and execute action
         webviewView.webview.onDidReceiveMessage(async (data) => {
             console.log("Recieved message: ", data);
-            
+
             switch (data.type) {
                 case "onFetchText": {
                     let editor = vscode.window.activeTextEditor;
@@ -186,9 +188,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     const customParams = data.value;
                     generateTestReq.customParams = customParams;
                     console.log("customParams", customParams);
+                    console.log("Asking for context file data");
                     this._view?.webview.postMessage({
                         type: "sendContextFileData",
-                        value: "",
                     });
                     break;
                 }
@@ -225,22 +227,31 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         contextFile: "false",
                     });
                     generateTestReq.files = files;
-                    console.log("Sending axios request generateTestReq", generateTestReq);
-                    axios({
-                        url: "http://localhost:3000/generate-tests",
-                        method: "POST",
-                        headers: {
-                            Accept: "application/json",
-                            "Content-Type": "application/json;charset=UTF-8",
-                        },
-                        data: generateTestReq,
-                    }).then((response) => {
-                        console.log("response", response.data);
-                        this._view?.webview.postMessage({
-                            type: "pushedTestCaseText",
-                            value: response.data,
+                    console.log(
+                        "Sending axios request generateTestReq",
+                        generateTestReq
+                    );
+                    try {
+                        const response = await axios({
+                            url: "http://localhost:3000/generateUnitTests",
+                            method: "POST",
+                            headers: {
+                                Accept: "application/json",
+                                "Content-Type":
+                                    "application/json;charset=UTF-8",
+                            },
+                            data: generateTestReq,
                         });
-                    });
+                        console.log("Axios Generate response: ", response);
+                    } catch (error) {
+                        console.log("Axios Generate error: ", error);
+                        console.error(error);
+                    }
+
+                    generateTestReq = {
+                        customParams: [],
+                        files: [],
+                    };
                     break;
                 }
                 case "onInfo": {
@@ -259,7 +270,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 }
             }
         });
-
     }
 
     public revive(panel: vscode.WebviewView) {
@@ -317,8 +327,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 }
 
 function getNonce() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let text = "";
+    const possible =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (let i = 0; i < 32; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }

@@ -20,6 +20,8 @@ function App() {
                     setPushedTestCaseText(message.value);
                     break;
                 }
+                default:
+                    break;
             }
       });
     }, [])
