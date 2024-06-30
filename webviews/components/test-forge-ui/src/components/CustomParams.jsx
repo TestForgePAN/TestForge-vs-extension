@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { vscode } from "../vscode";
+import State from "../state.mjs";
 
 const CustomParams = ({ submitCustomParams, setsubmitCustomParams }) => {
     const [showForm, setShowForm] = useState(true);
@@ -8,6 +9,7 @@ const CustomParams = ({ submitCustomParams, setsubmitCustomParams }) => {
     const [methods, setMethods] = useState([]);
     const [schema, setschema] = useState([]);
     const [formValues, setFormValues] = useState([]);
+    const {gState, setGState} = useContext(State)
 
     function convertArrayToObject(arr) {
         const result = {};
@@ -52,31 +54,20 @@ const CustomParams = ({ submitCustomParams, setsubmitCustomParams }) => {
     }, []);
 
     useEffect(() => {
-        if (submitCustomParams) {
-            console.log("adding custom params to the data");
-            const customPropsRequest = [];
-            for (let i = 0; i < methods.length; i++) {
-                const methodName = methods[i];
-                for (let j = 0; j < formValues[i].testCases.length; j++) {
-                    customPropsRequest.push({
-                        functionName: methodName,
-                        params: convertArrayToObject(
-                            formValues[i].testCases[j].parameters
-                        ),
-                        returns: formValues[i].testCases[j].returnType.value,
-                    });
-                }
+        const customPropsRequest = [];
+        for (let i = 0; i < methods.length; i++) {
+            const methodName = methods[i];
+            for (let j = 0; j < formValues[i].testCases.length; j++) {
+                customPropsRequest.push({
+                    functionName: methodName,
+                    params: convertArrayToObject(
+                        formValues[i].testCases[j].parameters
+                    ),
+                    returns: formValues[i].testCases[j].returnType.value,
+                });
             }
-            vscode.postMessage({
-                type: "pushCustomParams",
-                value: customPropsRequest,
-            });
-            setsubmitCustomParams(false);
         }
-    }, [submitCustomParams]);
-
-    useEffect(() => {
-        console.log("form values: ", formValues);
+        setGState(p => ({...p, customPropsRequest: customPropsRequest}));
     }, [formValues]);
 
     useEffect(() => {

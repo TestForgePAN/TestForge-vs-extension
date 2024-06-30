@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Select from "react-dropdown-select";
 import { vscode } from '../vscode';
+import State from '../state.mjs';
 
 function SearchBar() {
     
@@ -9,9 +10,16 @@ function SearchBar() {
     const [files, setFiles] = useState<{value: number, label: string}[]>([]);
 
     const [values, setValues] = useState<{value: number, label: string}[]>([]);
+
+    const {gState, setGState} = React.useContext(State);
     
+    useEffect(() => {
+        setGState(p => ({...p, files: values}))
+    }, [values])
 
     useEffect(() => {
+        console.log(gState);
+        
         window.addEventListener("message", (event) => {
             const message = event.data;
             console.log("Recived message in search bar: " + message.type);
@@ -28,15 +36,6 @@ function SearchBar() {
                         ]);
                     });
                     console.log("Files: ", files);
-                    break;
-                }
-                case "sendContextFileData": {
-                    // select the button with id sendFilesForContext and click it
-                    document.getElementById("sendFilesForContext")?.click();
-                    // vscode.postMessage({
-                    //     type: "gotContextFileData",
-                    //     value: values,
-                    // });
                     break;
                 }
             }

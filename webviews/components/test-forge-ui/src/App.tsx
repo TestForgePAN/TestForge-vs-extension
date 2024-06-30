@@ -1,14 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { vscode } from "./vscode";
 import SearchBar from "./components/searchBar";
 import CustomParams from './components/CustomParams';
+import State from './state.mjs';
 
 function App() {
     const [pushedTestCaseText, setPushedTestCaseText] = useState("");
 
     const [submitCustomParams, setsubmitCustomParams] = useState(false);
+    const [gState, setGState] = useState("Hello world!");
 
     useEffect(() => {
       window.addEventListener("message", (event) => {
@@ -27,6 +29,7 @@ function App() {
     }, [])
 
     return (
+        <State.Provider value={{gState, setGState}}>
         <div className="bg-gradient-to-r from-blue-600 to-purple-500 p-10">
             <h1>TestForge</h1>
             <CustomParams
@@ -44,13 +47,16 @@ function App() {
                     //     type: "addCustomParams",
                     //     value: "",
                     // });
-                    setsubmitCustomParams(true);
+                    console.log("gstate" + gState);
+                    
+                    // setsubmitCustomParams(true);
                 }}
             >
                 Generate tests
             </button>
             <pre>{pushedTestCaseText}</pre>
         </div>
+        </State.Provider>
     );
 }
 
