@@ -44,6 +44,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
         let allFiles: string[] = [];
 
+        const generateTestReq = {
+            customParams: [],
+            files: [],
+        };
+
         for (const folder of workspaceFolders) {
             const folderPath = folder.uri.fsPath;
             this.getFilesInDirectory(folderPath);
@@ -72,6 +77,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         // Listen for messages from the Sidebar component and execute action
         webviewView.webview.onDidReceiveMessage(async (data) => {
             console.log("Recieved message: ", data);
+            
             switch (data.type) {
                 case "onFetchText": {
                     let editor = vscode.window.activeTextEditor;
@@ -91,7 +97,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             "Content-Type": "application/json;charset=UTF-8",
                         },
                         data: {
-                            text: editor.document.getText()
+                            text: editor.document.getText(),
                         },
                     }).then((response) => {
                         console.log("response", response.data);
@@ -111,15 +117,130 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 case "sendFilesForContext": {
                     console.log("All files", allFiles);
                     console.log("Sending files for context");
-                    for(const file of data.value) {
+                    const fileContentData: string[] = [];
+                    for (const file of data.value) {
                         console.log("File: ", file);
                         console.log("File path: ", allFiles[file.value]);
                         // Read the file at the specified path
                         const filePath = allFiles[file.value];
                         const fileContent = fs.readFileSync(filePath, "utf8");
                         console.log("File content: ", fileContent);
+                        // Add the file content to the array
+                        fileContentData.push(fileContent);
                         // Send the file content to the webview
                     }
+                    await axios({
+                        url: "http://localhost:3000/sendContextFiles",
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json;charset=UTF-8",
+                        },
+                        data: {
+                            files: fileContentData,
+                        },
+                    }).then((response) => {
+                        console.log("response", response.data);
+                        this._view?.webview.postMessage({
+                            type: "pushedTestCaseText",
+                            value: response.data,
+                        });
+                    });
+                    break;
+                }
+                case "fetchCustomParams": {
+                    let editor = vscode.window.activeTextEditor;
+
+                    if (editor === undefined) {
+                        vscode.window.showErrorMessage("No active text editor");
+                        return;
+                    }
+                    const openedFileName = editor.document.fileName;
+                    const openedFileContent = editor.document.getText();
+                    axios({
+                        url: "http://localhost:3000/getParams",
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json;charset=UTF-8",
+                        },
+                        data: {
+                            name: openedFileName,
+                            fileContent: openedFileContent,
+                        },
+                    })
+                        .then((response) => {
+                            console.log("response", response.data);
+                            this._view?.webview.postMessage({
+                                type: "customParamsUpdated",
+                                value: response.data,
+                            });
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                        });
+
+                    break;
+                }
+                case "pushCustomParams": {
+                    const customParams = data.value;
+                    generateTestReq.customParams = customParams;
+                    console.log("customParams", customParams);
+                    this._view?.webview.postMessage({
+                        type: "sendContextFileData",
+                        value: "",
+                    });
+                    break;
+                }
+                case "gotContextFileData": {
+                    const files = [];
+                    for (const file of data.value) {
+                        console.log("File: ", file);
+                        console.log("File path: ", allFiles[file.value]);
+                        // Read the file at the specified path
+                        const filePath = allFiles[file.value];
+                        const fileName = file.label;
+                        const fileContent = fs.readFileSync(filePath, "utf8");
+                        console.log("File content: ", fileContent);
+                        // Add the file content to the array
+                        files.push({
+                            fileName: fileName,
+                            content: fileContent,
+                            contextFile: "true",
+                        });
+                        // Send the file content to the webview
+                    }
+                    let editor = vscode.window.activeTextEditor;
+
+                    if (editor === undefined) {
+                        vscode.window.showErrorMessage("No active text editor");
+                        return;
+                    }
+
+                    const fileName = editor.document.fileName.split("/").pop();
+                    const fileContent = editor.document.getText();
+                    files.push({
+                        fileName: fileName,
+                        content: fileContent,
+                        contextFile: "false",
+                    });
+                    generateTestReq.files = files;
+                    console.log("Sending axios request generateTestReq", generateTestReq);
+                    axios({
+                        url: "http://localhost:3000/generate-tests",
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json;charset=UTF-8",
+                        },
+                        data: generateTestReq,
+                    }).then((response) => {
+                        console.log("response", response.data);
+                        this._view?.webview.postMessage({
+                            type: "pushedTestCaseText",
+                            value: response.data,
+                        });
+                    });
                     break;
                 }
                 case "onInfo": {

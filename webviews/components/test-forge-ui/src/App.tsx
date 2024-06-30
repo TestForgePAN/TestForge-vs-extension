@@ -7,6 +7,9 @@ import CustomParams from './components/CustomParams';
 
 function App() {
     const [pushedTestCaseText, setPushedTestCaseText] = useState("");
+
+    const [submitCustomParams, setsubmitCustomParams] = useState(false);
+
     useEffect(() => {
       window.addEventListener("message", (event) => {
         // console.log("Got message");
@@ -20,17 +23,26 @@ function App() {
             }
       });
     }, [])
+
     return (
         <div className="bg-gradient-to-r from-blue-600 to-purple-500 p-10">
             <h1>TestForge</h1>
-            <CustomParams />
+            <CustomParams
+                submitCustomParams={submitCustomParams}
+                setsubmitCustomParams={setsubmitCustomParams}
+            />
             <SearchBar />
             <button
                 onClick={() => {
-                    vscode.postMessage({
-                        type: "onFetchText",
-                        value: "",
-                    });
+                    // vscode.postMessage({
+                    //     type: "onFetchText",
+                    //     value: "",
+                    // });
+                    // vscode.postMessage({
+                    //     type: "addCustomParams",
+                    //     value: "",
+                    // });
+                    setsubmitCustomParams(true);
                 }}
             >
                 Generate tests

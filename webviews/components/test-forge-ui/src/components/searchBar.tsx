@@ -28,6 +28,11 @@ function SearchBar() {
                     console.log("Files: ", files);
                     break;
                 }
+                case "sendContextFileData": {
+                    // select the button with id sendFilesForContext and click it
+                    document.getElementById('sendFilesForContext').click();
+                    break;
+                }
             }
         });
     }, []);
@@ -53,9 +58,10 @@ function SearchBar() {
             }}
         />
         <button
+            id='sendFilesForContext'
             onClick={() => {
                 vscode.postMessage({
-                    type: "sendFilesForContext",
+                    type: "gotContextFileData",
                     value: values,
                 });
             }}
