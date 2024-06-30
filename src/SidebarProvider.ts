@@ -194,9 +194,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     });
                     break;
                 }
-                case "gotContextFileData": {
+                case "generateTests": {
+                    console.log("Generating tests");
+                    console.log(data.value);
                     const files = [];
-                    for (const file of data.value) {
+                    for (const file of data.value.files) {
                         console.log("File: ", file);
                         console.log("File path: ", allFiles[file.value]);
                         // Read the file at the specified path
@@ -210,7 +212,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             content: fileContent,
                             contextFile: "true",
                         });
-                        // Send the file content to the webview
                     }
                     let editor = vscode.window.activeTextEditor;
 
@@ -226,11 +227,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         content: fileContent,
                         contextFile: "false",
                     });
-                    generateTestReq.files = files;
-                    console.log(
-                        "Sending axios request generateTestReq",
-                        generateTestReq
-                    );
                     try {
                         const response = await axios({
                             url: "http://localhost:3000/generateUnitTests",
@@ -240,7 +236,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                                 "Content-Type":
                                     "application/json;charset=UTF-8",
                             },
-                            data: generateTestReq,
+                            data: {
+                                files,
+                                customParams: data.value.customPropsRequest,
+                            },
                         });
                         console.log("Axios Generate response: ", response);
                     } catch (error) {
@@ -248,11 +247,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         console.error(error);
                     }
 
-                    generateTestReq = {
-                        customParams: [],
-                        files: [],
-                    };
-                    break;
+                    // generateTestReq = {
+                    //     customParams: [],
+                    //     files: [],
+                    // };
+                    // break;
                 }
                 case "onInfo": {
                     if (!data.value) {

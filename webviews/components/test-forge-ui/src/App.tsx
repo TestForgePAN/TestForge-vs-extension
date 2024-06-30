@@ -10,7 +10,7 @@ function App() {
     const [pushedTestCaseText, setPushedTestCaseText] = useState("");
 
     const [submitCustomParams, setsubmitCustomParams] = useState(false);
-    const [gState, setGState] = useState("Hello world!");
+    const [gState, setGState] = useState();
 
     useEffect(() => {
       window.addEventListener("message", (event) => {
@@ -47,8 +47,11 @@ function App() {
                     //     type: "addCustomParams",
                     //     value: "",
                     // });
-                    console.log("gstate" + gState);
-                    
+                    console.log("gstate", gState);
+                    vscode.postMessage({
+                        type: "generateTests",
+                        value: gState,
+                    })
                     // setsubmitCustomParams(true);
                 }}
             >
